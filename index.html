@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书信之旅 - 完美布局版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f1e8;
+            color: #333;
+            overflow: hidden;
+            position: relative;
+            font-family: 'Noto Serif SC', serif;
+            padding: 20px;
+        }
+        
+        /* 全局背景层 */
+        .global-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+            filter: brightness(0.8);
+        }
+        
+        .global-bg.active {
+            opacity: 1;
+            z-index: -1;
+        }
+        
+        .global-bg.inactive {
+            opacity: 0;
+        }
+        
+        /* 毛玻璃覆盖层 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            background: rgba(245, 241, 232, 0.85);
+            z-index: -1;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            height: 90vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cards-container {
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+        
+        .card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 450px;
+            min-height: 500px;
+            border-radius: 8px;
+            padding: 40px 35px;
+            background: #fffdf9;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e8e0d0;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1;
+            opacity: 1;
+            background-image: 
+                linear-gradient(to bottom, rgba(232, 224, 208, 0.2) 1px, transparent 1px);
+            background-size: 100% 2em;
+            background-position: 0 4.5em;
+            line-height: 2em;
+            transform-origin: center center;
+        }
+        
+        .card.active {
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 100;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            opacity: 1;
+            filter: none;
+        }
+        
+        .card.prev {
+            transform: translate(-50%, calc(-50% - 15%)) scale(0.95);
+            z-index: 90;
+            opacity: 0.95;
+        }
+        
+        .card.next {
+            transform: translate(-50%, calc(-50% + 15%)) scale(0.95);
+            z-index: 90;
+            opacity: 0.95;
+        }
+        
+        /* 修复卡片位置 */
+        .card.inactive {
+            transform: translate(-50%, -50%) scale(0.85);
+            opacity: 0.6;
+            z-index: 5;
+            filter: blur(1px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e8e0d0;
+        }
+        
+        .card-date {
+            font-size: 0.95rem;
+            color: #8c7b6b;
+            font-style: italic;
+        }
+        
+        .card-location {
+            font-size: 0.95rem;
+            color: #8c7b极光;
+        }
+        
+        .card-greeting {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #5a3d5c;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .card-greeting::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: #e8c4c4;
+            border-radius: 50%;
+        }
+        
+        .card-content {
+            font-size: 1.05rem;
+            line-height: 2;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: justify;
+            padding-right: 15px;
+            flex-grow: 1;
+        }
+        
+        .card-signature {
+            text-align: right;
+            margin-top: 40px;
+            font-family: 'Dancing Script', cursive;
+            font极光: 1.8rem;
+            color: #5a3d5c;
+            position: relative;
+            padding-right: 20px;
+        }
+        
+        .card-signature::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: #e8c4c4;
+            border-radius: 50%;
+        }
+        
+        .card-footer {
+            margin-top: 10px;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #8c7b6b;
+            font-style: italic;
+        }
+        
+        .subtle-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.3;
+            transition: opacity 0.5s ease;
+            z-index: 200;
+        }
+        
+        .hint-arrow {
+            font-size: 1.2rem;
+            color: #8c7b6b;
+            animation: bounce 2s infinite;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            background: rgba(232, 196, 196, 0.15);
+            cursor: pointer;
+        }
+        
+        .hint-arrow.up {
+            margin-bottom: 5px;
+        }
+        
+        .hint-arrow.down {
+            margin-top: 5px;
+        }
+        
+        .hint-arrow:hover {
+            background: rgba(232, 196, 196, 0.3);
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-8px);}
+            60% {transform: translateY(-4px);}
+        }
+        
+        .stamp {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border: 1px dashed #e8c4c4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: 0.9rem;
+            color: #e8c4c4;
+            transform: rotate(15deg);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .envelope-flap {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            height: 30px;
+            background: #fffdf9;
+            border: 1px solid #e8e0d0;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            z-index: 2;
+        }
+        
+        .page-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #8c7b6b;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            z-index: 150;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .card {
+                height: auto;
+                min-height: 450px;
+                padding: 30px 25px;
+            }
+            
+            .card-greeting {
+                font-size: 1.6rem;
+            }
+            
+            .card-content {
+                font-size: 0.98rem;
+            }
+            
+            .card-signature {
+                font-size: 1.6rem;
+            }
+            
+            .stamp {
+                width: 50px;
+                height: 50px;
+                font-size: 0.8rem;
+            }
+            
+            .hint-arrow {
+                font-size: 1rem;
+                width: 30px;
+                height: 30px;
+            }
+            
+            .page-indicator {
+                top: 15px;
+                font-size: 0.8rem;
+                padding: 4px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 全局背景层 -->
+    <div class="global-bg active" style="background-image: url('https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8f极光8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')"></div>
+    <div class="global-bg inactive" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+    <div class="global-bg inactive" style="background-image: url('https://images.unsplash.com/photo-1493246318656-5bfd4cfb29b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+    <div class="global-bg inactive" style="background-image: url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+    <div class="global-bg inactive" style="background-image: url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+    
+    <!-- 毛玻璃覆盖层 -->
+    <div class="overlay"></div>
+    
+    <div class="container">
+        <div class="cards-container">
+            <!-- 页面指示器 -->
+            <div class="page-indicator">第 <span id="current-page">1</span>/5 页</div>
+            
+            <!-- 卡片1：信的开头 -->
+            <div class="card active" data-index="0">
+                <div class="envelope-flap"></div>
+                <div class="stamp">启</div>
+                <div class="card-header">
+                    <div class="card-date">2023年6月15日</div>
+                    <div class="card-location">巴黎，法国</div>
+                </div>
+                <h2 class="card-greeting">亲爱的朋友，</h2>
+                <p class="card-content">
+                    当你读到这封信时，我正坐在塞纳河畔的咖啡馆里，看着夕阳给巴黎圣母院披上金色的外衣。窗外的梧桐树在微风中轻舞，空气中弥漫着咖啡和新鲜面包的香气。
+                    <br><br>
+                    巴黎的六月温柔而浪漫，街头艺人的手风琴声随风飘荡，情侣们依偎在河堤边。我常常想起我们大学时代的约定，要一起游历欧洲，虽然生活让我们各奔东西，但此刻我仿佛能感受到你就在身边。
+                </p>
+            </div>
+            
+            <!-- 卡片2：信的内容（第一部分） -->
+            <div class="card next" data-index="1">
+                <div class="envelope-flap"></div>
+                <div class="stamp">叙</div>
+                <div class="card-header">
+                    <div class="card-date">2023年6月16日</div>
+                    <div class="card-location">蒙马特高地</div>
+                </div>
+                <p class="card-content">
+                    今天我在蒙马特高地漫步，艺术家们正在创作，他们的画布上满是这座城市的色彩与光影。站在圣心大教堂前，整个巴黎尽收眼底——蜿蜒的塞纳河、古老的建筑、远处的埃菲尔铁塔。
+                    <br><br>
+                    我走进一家小巷深处的书店，店主是位银发老绅士，他向我推荐了海明威的《流动的盛宴》。"巴黎是一席流动的盛宴"，这句话此刻有了全新的意义。在这里，每块鹅卵石都诉说着故事，每扇百叶窗后都藏着一段历史。
+                    <br><br>
+                    生活就像巴黎的街道，充满未知的转弯。有时我们会迷路，但正是在这些意外的转角，我们遇见最美的风景。
+                </p>
+            </div>
+            
+            <!-- 卡片3：信的内容（第二部分） -->
+            <div class="card inactive" data-index="2">
+                <div class="envelope-flap"></div>
+                <div class="stamp">思</div>
+                <div class="card-header">
+                    <div class="card-date">2023年6月17日</div>
+                    <div class="card-location">卢浮宫</div>
+                </div>
+                <p class="card-content">
+                    昨天我去了卢浮宫，在《蒙娜丽莎》前驻足良久。她的微笑依然神秘，但更触动我的是那些默默无闻的参观者：一位老妇人对着希腊雕塑流泪，一个小男孩在埃及文物前睁大眼睛，一对恋人在印象派画作前低语。
+                    <br><br>
+                    艺术的神奇之处在于，它能跨越时空连接不同的人。站在这些杰作前，我突然明白了我们为什么需要美——它让我们在平凡中看见永恒，在孤独中感受共鸣。
+                    <br><br>
+                    夜晚，我沿着塞纳河散步，灯光在河面上摇曳。游船载着欢声笑语驶过，桥上的恋人们挂上爱情锁。这座城市白天是优雅的贵妇，夜晚则变成浪漫的诗人。
+                </p>
+            </div>
+            
+            <!-- 卡片4：信的内容（第三部分） -->
+            <div class="card inactive" data-index="3">
+                <div class="envelope-flap"></div>
+                <div class="stamp">忆</div>
+                <div class="card-header">
+                    <div class="card-date">2023年6月18日</div>
+                    <div class="card-location">巴黎左岸</极光div>
+                </div>
+                <p class="card-content">
+                    记得大学时，我们最爱的法语老师杜邦先生常说："生活不是等待暴风雨过去，而是学会在雨中跳舞。"当时我不太明白，但在巴黎的雨天，我真正懂得了这句话。
+                    <br><br>
+                    今晨下雨了，我本以为行程会被打乱，却意外发现了雨中的巴黎之美。咖啡馆里，人们悠闲地看报聊天；花店前，玫瑰上的雨滴晶莹剔透；小巷中，孩子们穿着雨靴欢快地踩水。
+                    <br><br>
+                    巴黎教会我慢下来，去欣赏那些曾被忽略的瞬间：面包店飘出的香气，老人喂鸽子的专注，书店橱窗的精心布置。真正的旅行不在于打卡多少景点，而在于让一个地方触动你的心灵。
+                </p>
+            </div>
+            
+            <!-- 卡片5：信的结尾 -->
+            <div class="card inactive" data-index="4">
+                <div class="envelope-flap"></div>
+                <div class="stamp">终</div>
+                <div class="card-header">
+                    <div class="card-date">2023年6月19日</div>
+                    <div class="card-location">埃菲尔铁塔</div>
+                </div>
+                <p class="card-content">
+                    明天我将离开巴黎前往普罗旺斯，但这座城市已在我心中留下永恒的印记。站在埃菲尔铁塔下，我许下一个愿望：希望不久的将来，我们能在这里重逢，一起品尝左岸的咖啡，分享彼此的故事。
+                    <br><br>
+                    旅程终有归期，但心灵之旅永无止境。愿这些文字如塞纳河上的微风，带去我对你的思念和祝福。请记得，无论我们身在何处，友谊就像巴黎的星空，虽然不总是可见，却永远存在。
+                </p>
+                <div class="card-signature">你的朋友</div>
+                <div class="card-footer">艾米莉</div>
+                <div class="card-footer" style="margin-top: 5px;">于巴黎左岸</div>
+            </div>
+        </div>
+        
+        <div class="subtle-hint">
+            <div class="hint-arrow up" onclick="prevCard()">
+                <i class="fas fa-chevron-up"></i>
+            </div>
+            <div class="hint-arrow down" onclick="nextCard()">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.container');
+            const cards = document.querySelectorAll('.card');
+            const hintArrows = document.querySelectorAll('.hint-arrow');
+            const globalBgs = document.querySelectorAll('.global-bg');
+            const currentPage = document.getElementById('current-page');
+            
+            let currentIndex = 0;
+            let startY = 0;
+            let isAnimating = false;
+            let activeBgIndex = 0;
+            
+            // 卡片背景图片数组
+            const bgImages = [
+                'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
+                'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+                'https://images.unsplash.com/photo-1493246318656-5bfd4cfb29b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+                'https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+                'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
+            ];
+            
+            // 初始化卡片位置
+            function initCards() {
+                cards.forEach((card, index) => {
+                    if (index === 0) {
+                        card.classList.add('active');
+                    } else if (index === 1) {
+                        card.classList.add('next');
+                    } else {
+                        card.classList.add('inactive');
+                    }
+                });
+                updatePageIndicator();
+            }
+            
+            initCards();
+            
+            // 更新页面指示器
+            function updatePageIndicator() {
+                currentPage.textContent = currentIndex + 1;
+            }
+            
+            // 切换全局背景
+            function changeGlobalBg() {
+                // 切换激活状态
+                globalBgs[activeBgIndex].classList.remove('active');
+                globalBgs[activeBgIndex].classList.add('inactive');
+                
+                // 更新索引
+                activeBgIndex = (activeBgIndex + 1) % globalBgs.length;
+                
+                // 设置新背景
+                globalBgs[activeBgIndex].style.backgroundImage = `url(${bgImages[currentIndex]})`;
+                
+                // 激活新背景
+                globalBgs[activeBgIndex].classList.remove('inactive');
+                globalBgs[activeBgIndex].classList.add('active');
+            }
+            
+            // 更新卡片状态 - 修复位置偏移问题
+            function updateCards() {
+                // 移除所有卡片状态
+                cards.forEach(card => {
+                    card.classList.remove('active', 'next', 'prev', 'inactive');
+                });
+                
+                // 设置当前卡片
+                cards[currentIndex].classList.add('active');
+                
+                // 设置前一张卡片
+                if (currentIndex > 0) {
+                    cards[currentIndex - 1].classList.add('prev');
+                }
+                
+                // 设置后一张卡片
+                if (currentIndex < cards.length - 1) {
+                    cards[currentIndex + 1].classList.add('next');
+                }
+                
+                // 设置其他卡片为inactive
+                cards.forEach((card, index) => {
+                    if (index !== currentIndex && 
+                        index !== currentIndex - 1 && 
+                        index !== currentIndex + 1) {
+                        card.classList.add('inactive');
+                    }
+                });
+                
+                // 更新页面指示器
+                updatePageIndicator();
+                
+                // 切换全局背景
+                changeGlobalBg();
+            }
+            
+            // 上一张卡片
+            function prevCard() {
+                if (isAnimating) return;
+                isAnimating = true;
+                
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCards();
+                } else {
+                    // 添加视觉反馈
+                    const upArrow = document.querySelector('.hint-arrow.up');
+                    upArrow.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        upArrow.style.animation = '';
+                    }, 500);
+                }
+                
+                // 重置动画状态
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 800);
+            }
+            
+            // 下一张卡片
+            function nextCard() {
+                if (isAnimating) return;
+                isAnimating = true;
+                
+                if (currentIndex < cards.length - 1) {
+                    currentIndex++;
+                    updateCards();
+                } else {
+                    // 添加视觉反馈
+                    const downArrow = document.querySelector('.hint-arrow.down');
+                    downArrow.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        downArrow.style.animation = '';
+                    }, 500);
+                }
+                
+                // 重置动画状态
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 800);
+            }
+            
+            // 添加摇动动画
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    50% { transform: translateX(5px); }
+                    75% { transform: translateX(-5px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 触摸事件处理
+            container.addEventListener('touchstart', function(e) {
+                startY = e.touches[0].
